@@ -29,8 +29,8 @@ This repository contains a fully functional **Stake Smart Contract** built using
 ## ⚙️ Installation
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-repo-url.git
-    cd stake-contract
+    git clone https://github.com/wasim007choudhary/Stake-Smart-Contract---Foundry.git
+
     ```
 
 2. Install Foundry dependencies:
@@ -38,10 +38,8 @@ This repository contains a fully functional **Stake Smart Contract** built using
     forge install
     ```
 
-3. Install additional packages (e.g., Chainlink contracts):
-    ```bash
-    npm install
-    ```
+3. Install additional packages (e.g., Chainlink-Brownie-contracts):
+    
 
 ---
 
