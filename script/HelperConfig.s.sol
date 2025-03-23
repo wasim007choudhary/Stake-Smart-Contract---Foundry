@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+
 import {Script, console2} from "forge-std/Script.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 import {LinkToken} from "test/Mocks/LinkToken.sol";
@@ -8,8 +9,7 @@ abstract contract CodeConstantVariable {
     uint256 public constant ETHEREUM_MAINNET_CHAINID = 1;
     uint256 public constant SEPOLIA_ETH_CHAIN_ID = 11155111;
     uint256 public constant LOCAL_CHAINID = 31337;
-    address public constant FOUNDRY_AC_DEFAULT_SENDER =
-        0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
+    address public constant FOUNDRY_AC_DEFAULT_SENDER = 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38;
 
     //Mock variables//
     uint96 public BASE_FEE__MOCK = 0.2 ether;
@@ -43,16 +43,11 @@ contract HelperConfig is CodeConstantVariable, Script {
         return GetconfigByChainId(block.chainid);
     }
 
-    function setConfig(
-        uint256 chainId,
-        NetworkConfig memory networkConfig
-    ) public {
+    function setConfig(uint256 chainId, NetworkConfig memory networkConfig) public {
         Networkconfigurations[chainId] = networkConfig;
     }
 
-    function GetconfigByChainId(
-        uint256 chainId
-    ) public returns (NetworkConfig memory) {
+    function GetconfigByChainId(uint256 chainId) public returns (NetworkConfig memory) {
         if (Networkconfigurations[chainId].vrfcoordinator != address(0)) {
             return Networkconfigurations[chainId];
         } else if (chainId == LOCAL_CHAINID) {
@@ -62,11 +57,7 @@ contract HelperConfig is CodeConstantVariable, Script {
         }
     }
 
-    function GETsepoliaETHconfig()
-        public
-        pure
-        returns (NetworkConfig memory NetworkConfigForSepolia)
-    {
+    function GETsepoliaETHconfig() public pure returns (NetworkConfig memory NetworkConfigForSepolia) {
         NetworkConfigForSepolia = NetworkConfig({
             entryfee: 0.01 ether,
             interval: 30,
@@ -79,11 +70,7 @@ contract HelperConfig is CodeConstantVariable, Script {
         });
     }
 
-    function getEThMainnetConfig()
-        public
-        pure
-        returns (NetworkConfig memory NetworkConfigMainNet)
-    {
+    function getEThMainnetConfig() public pure returns (NetworkConfig memory NetworkConfigMainNet) {
         NetworkConfigMainNet = NetworkConfig({
             entryfee: 0.01 ether,
             subId: 0,
@@ -102,11 +89,8 @@ contract HelperConfig is CodeConstantVariable, Script {
         }
         console2.log("Mock Contracj Deployed");
         vm.startBroadcast();
-        VRFCoordinatorV2_5Mock vrfcoordinatorV2_5mock = new VRFCoordinatorV2_5Mock(
-                BASE_FEE__MOCK,
-                GAS_PRICE__MOCK,
-                WEI_PER_UNIT_LINK__MOCK
-            );
+        VRFCoordinatorV2_5Mock vrfcoordinatorV2_5mock =
+            new VRFCoordinatorV2_5Mock(BASE_FEE__MOCK, GAS_PRICE__MOCK, WEI_PER_UNIT_LINK__MOCK);
         LinkToken link = new LinkToken();
         vm.stopBroadcast();
 

@@ -13,8 +13,7 @@ import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/autom
  * @notice This contracts shows how to create a fully functioning Stake contract
  * @dev Implementing Chainlink VRFv2.5 and Automation !
  */
-
-contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface{
+contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface {
     /**
      * @notice errors
      */
@@ -24,12 +23,17 @@ contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface{
     error Stake__EntryClosedAttheMoment();
     error Stake__NoOneWonTillNow();
     error Stake__IndexOutOfBounds();
-    error Stake__upkeepNotNeeded(uint256 Contractbalance, uint256 Playerslength, uint256 /* or StakeCondition */ stakecondition);
+    error Stake__upkeepNotNeeded(
+        uint256 Contractbalance, uint256 Playerslength, uint256 /* or StakeCondition */ stakecondition
+    );
 
-    /**@notice Type variables */
+    /**
+     * @notice Type variables
+     */
     enum StakeCondition {
         OPEN, //0
         CALCULATING // 1
+
     }
 
     /**
@@ -45,10 +49,11 @@ contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface{
     StakeCondition private s_StakeCondition;
 
     address payable[] private s_Players;
-    address[]
-        private s_winnersArray; /** @notice we can remove this too as We can get the logs offchain through events, but since want a getter function for all the winners, using it
-    use s_winnersArray ^ on your own accord as it will cost gas */
-
+    address[] private s_winnersArray;
+    /**
+     * @notice we can remove this too as We can get the logs offchain through events, but since want a getter function for all the winners, using it
+     * use s_winnersArray ^ on your own accord as it will cost gas
+     */
     uint256 private s_lastTimeStamp;
 
     /**
@@ -79,25 +84,24 @@ contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface{
     }
 
     function StakeEntry() external payable {
-        
-          if (s_StakeCondition != StakeCondition.OPEN) {
+        if (s_StakeCondition != StakeCondition.OPEN) {
             revert Stake__EntryClosedAttheMoment();
         }
 
-          if (msg.value < i_StakeEntryfee) {
+        if (msg.value < i_StakeEntryfee) {
             revert Stake__Insufficient_Eth_Entryfee();
         }
-      
-      
+
         s_Players.push(payable(msg.sender));
         emit Stake_PlayerEntered(msg.sender);
     }
 
     function checkUpkeep(
-        bytes memory /* checkData */    // before it was calldata instead of memory but tweaked it a little for the performUpkeep function
-    ) public view override returns (bool upkeepNeeded, bytes memory /* performData */) {
-        /** @notice --
-         
+        bytes memory /* checkData */ // before it was calldata instead of memory but tweaked it a little for the performUpkeep function
+    ) public view override returns (bool upkeepNeeded, bytes memory /* performData */ ) {
+        /**
+         * @notice --
+         *
          * @dev This is the function called by  chainlink nodes  to check if the contract is ready for getting the winner.
          *
          * In order for upKkeepNeeded to be true,the follow below should be true -
@@ -109,28 +113,21 @@ contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface{
          * @param - not used in this case
          * @return upkeepNeeded = true, provided if it's time to restart the Stake.
          */
-        bool timeIntervalhasPassed = ((block.timestamp - s_lastTimeStamp) >
-            i_StakeInterval);
+        bool timeIntervalhasPassed = ((block.timestamp - s_lastTimeStamp) > i_StakeInterval);
         bool StakeIsOPEN = s_StakeCondition == StakeCondition.OPEN;
         bool checkForBalance = address(this).balance > 0;
         bool checkForPlayers = s_Players.length > 0;
 
-        upkeepNeeded =
-            timeIntervalhasPassed &&
-            StakeIsOPEN &&
-            checkForBalance &&
-            checkForPlayers;
+        upkeepNeeded = timeIntervalhasPassed && StakeIsOPEN && checkForBalance && checkForPlayers;
         // if any of the above is false then no upKeepNeeded;
         return (upkeepNeeded, hex"");
-         //or  return (upkeepNeeded, "")
-        
+        //or  return (upkeepNeeded, "")
     }
 
-    function performUpkeep(bytes calldata /* peformData */) external override {
-    
-       (bool upkeepNeeded,) = checkUpkeep("");
-       if(!upkeepNeeded) {
-        revert Stake__upkeepNotNeeded(address(this).balance,s_Players.length, uint256(s_StakeCondition));
+    function performUpkeep(bytes calldata /* peformData */ ) external override {
+        (bool upkeepNeeded,) = checkUpkeep("");
+        if (!upkeepNeeded) {
+            revert Stake__upkeepNotNeeded(address(this).balance, s_Players.length, uint256(s_StakeCondition));
         } /* or can use uint256 or StakeCondition as OPEN = 0,CAL =1, lets use uint256 instead of enum name */
 
         /*  // Little less readibility so using another syntax //
@@ -147,47 +144,33 @@ contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface{
             })
         ); */
 
-
-            s_StakeCondition = StakeCondition.CALCULATING;
-             s_lastTimeStamp = block.timestamp;  //either update time here or in fulfillrandomWords
-             //also it is best practice to include in both as now in can Track When Upkeep Was Performed and in fulfill Tracking When a New Round Begins after winner etc everything finsihed 
-        
-
-        
-
+        s_StakeCondition = StakeCondition.CALCULATING;
+        s_lastTimeStamp = block.timestamp; //either update time here or in fulfillrandomWords
+            //also it is best practice to include in both as now in can Track When Upkeep Was Performed and in fulfill Tracking When a New Round Begins after winner etc everything finsihed
 
         //for bettr struct operation and understanding and also visit the chainlink vrf docs for more in dept knowledge
-        VRFV2PlusClient.RandomWordsRequest
-            memory requestStruct = VRFV2PlusClient.RandomWordsRequest({
-                keyHash: i_keyHash,
-                subId: i_subscriptionId,
-                requestConfirmations: REQUEST_CONFIRMATIONS,
-                callbackGasLimit: i_callbackGasLimit,
-                numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(
-                    VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
-                )
-            });
+        VRFV2PlusClient.RandomWordsRequest memory requestStruct = VRFV2PlusClient.RandomWordsRequest({
+            keyHash: i_keyHash,
+            subId: i_subscriptionId,
+            requestConfirmations: REQUEST_CONFIRMATIONS,
+            callbackGasLimit: i_callbackGasLimit,
+            numWords: NUM_WORDS,
+            extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
+        });
         uint256 requestId = s_vrfCoordinator.requestRandomWords(requestStruct);
         emit STake_RequestedWinnerId(requestId); // icnluding this even though the vrfcoordinator emits the same event because to make our test easier!
-   
-    
     }
 
-    function fulfillRandomWords(
-        uint256 /*requestId*/,
-        uint256[] calldata randomWords
-    ) internal virtual override {
-        
+    function fulfillRandomWords(uint256, /*requestId*/ uint256[] calldata randomWords) internal virtual override {
         uint256 IndexofWinner = randomWords[0] % s_Players.length;
         address payable recentWinner = s_Players[IndexofWinner];
         s_winnersArray.push(recentWinner);
-       
+
         if (s_winnersArray.length > 1) {
             emit Stake_WinnerListUpdated(recentWinner);
         }
 
-        (bool success, ) = recentWinner.call{value: address(this).balance}("");
+        (bool success,) = recentWinner.call{value: address(this).balance}("");
         if (!success) {
             revert STake__TransferFailedToThe_Winner();
         }
@@ -195,9 +178,8 @@ contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface{
         s_StakeCondition = StakeCondition.OPEN;
 
         // s_Players = new address payable[](0); // this resetting of array method = consumes more gas there fore
-        delete s_Players;// much prefered and gas efficient than the above array resetting method
+        delete s_Players; // much prefered and gas efficient than the above array resetting method
         s_lastTimeStamp = block.timestamp;
-       
     }
 
     /**
@@ -218,9 +200,7 @@ contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface{
         return s_winnersArray;
     }
 
-    function getWinnerByIndexNumber(
-        uint256 index
-    ) external view returns (address) {
+    function getWinnerByIndexNumber(uint256 index) external view returns (address) {
         if (index >= s_winnersArray.length) {
             revert Stake__IndexOutOfBounds();
         }
@@ -233,18 +213,20 @@ contract Stake is VRFConsumerBaseV2Plus, AutomationCompatibleInterface{
         }
         return s_winnersArray[s_winnersArray.length - 1];
     }
-    function getPlayersbyIndex(uint256 i) external view returns(address){
+
+    function getPlayersbyIndex(uint256 i) external view returns (address) {
         return s_Players[i];
     }
-    function getPlayers()external view returns(uint256){
+
+    function getPlayers() external view returns (uint256) {
         return s_Players.length;
     }
-    function getLastTimestamp() external view returns(uint256){
+
+    function getLastTimestamp() external view returns (uint256) {
         return s_lastTimeStamp;
     }
 
-    function getInterval()external view returns(uint256){
+    function getInterval() external view returns (uint256) {
         return i_StakeInterval;
     }
-    
 }

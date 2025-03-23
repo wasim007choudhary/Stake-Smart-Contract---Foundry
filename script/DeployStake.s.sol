@@ -19,18 +19,10 @@ contract DeployStake is Script {
         if (config.subId == 0) {
             CreateSub createSubContract = new CreateSub();
 
-            (config.subId, config.vrfcoordinator) = createSubContract.createSub(
-                config.vrfcoordinator,
-                config.account
-            );
+            (config.subId, config.vrfcoordinator) = createSubContract.createSub(config.vrfcoordinator, config.account);
             //fund the subscriotion
             fundSubscription fundsubscription = new fundSubscription();
-            fundsubscription.fundSub(
-                config.vrfcoordinator,
-                config.subId,
-                config.link,
-                config.account
-            );
+            fundsubscription.fundSub(config.vrfcoordinator, config.subId, config.link, config.account);
             helperconfig.setConfig(block.chainid, config);
         }
 
@@ -46,12 +38,7 @@ contract DeployStake is Script {
 
         vm.stopBroadcast();
 
-        addconsumer.addConsumer(
-            address(stake),
-            config.vrfcoordinator,
-            config.subId,
-            config.account
-        );
+        addconsumer.addConsumer(address(stake), config.vrfcoordinator, config.subId, config.account);
 
         return (stake, helperconfig);
     }

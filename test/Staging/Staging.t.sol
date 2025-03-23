@@ -65,22 +65,12 @@ contract StakeTest is StdCheats, Test {
         }
     }
 
-    function testFullfillRandomWordsCanOnlyBeCalledAfterPerfromUpkeep()
-        public
-        EnterStake
-        DeployedContractsOnly
-    {
+    function testFullfillRandomWordsCanOnlyBeCalledAfterPerfromUpkeep() public EnterStake DeployedContractsOnly {
         vm.expectRevert("nonexistent request");
-        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(
-            0,
-            address(stake)
-        );
+        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(0, address(stake));
         vm.expectRevert("nonexistent request");
 
-        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(
-            1,
-            address(stake)
-        );
+        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(1, address(stake));
     }
 
     function testFullfillrandomWordsPicksAwinnerResetthearrayAndSendtheMoneytoTheWinner()
@@ -92,11 +82,7 @@ contract StakeTest is StdCheats, Test {
         uint256 startingIndex = 1;
         address expectedWinner = address(1);
 
-        for (
-            uint256 i = startingIndex;
-            i < startingIndex + addtionalEntrants;
-            i++
-        ) {
+        for (uint256 i = startingIndex; i < startingIndex + addtionalEntrants; i++) {
             address newPlayer = address(uint160(i));
             hoax(newPlayer, 5 ether);
             stake.StakeEntry{value: entryfee}();
@@ -111,10 +97,7 @@ contract StakeTest is StdCheats, Test {
         Vm.Log[] memory entries = vm.getRecordedLogs();
         bytes32 requestId = entries[1].topics[1];
 
-        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(
-            uint256(requestId),
-            address(stake)
-        );
+        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(uint256(requestId), address(stake));
 
         address recentWinner = stake.getMostrecentWinner();
         Stake.StakeCondition sCondition = stake.getStakeCondition();

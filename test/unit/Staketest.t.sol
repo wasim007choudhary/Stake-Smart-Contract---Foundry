@@ -48,10 +48,7 @@ contract StakeTesting is CodeConstantVariable, Test {
         vm.startPrank(msg.sender);
         if (block.chainid == LOCAL_CHAINID) {
             link.mint(msg.sender, LINK_TOKEN_BALANCE);
-            VRFCoordinatorV2_5Mock(vrfcoordinator).fundSubscription(
-                subId,
-                LINK_TOKEN_BALANCE
-            );
+            VRFCoordinatorV2_5Mock(vrfcoordinator).fundSubscription(subId, LINK_TOKEN_BALANCE);
         }
         link.approve(vrfcoordinator, LINK_TOKEN_BALANCE);
         vm.stopPrank();
@@ -100,10 +97,7 @@ contract StakeTesting is CodeConstantVariable, Test {
         console.log("Required interval: ", stake.getInterval());
 
         stake.performUpkeep("");
-        console.log(
-            "Stake condition after performUpkeep: ",
-            uint256(stake.getStakeCondition())
-        );
+        console.log("Stake condition after performUpkeep: ", uint256(stake.getStakeCondition()));
 
         vm.expectRevert(Stake.Stake__EntryClosedAttheMoment.selector);
         vm.prank(PLAYER);
@@ -114,7 +108,7 @@ contract StakeTesting is CodeConstantVariable, Test {
         vm.warp(block.timestamp + interval);
         vm.roll(block.number + 1);
 
-        (bool upkeepNeeded, ) = stake.checkUpkeep("");
+        (bool upkeepNeeded,) = stake.checkUpkeep("");
 
         assert(!upkeepNeeded);
     }
@@ -126,7 +120,7 @@ contract StakeTesting is CodeConstantVariable, Test {
         vm.roll(block.number + 1);
         stake.performUpkeep("");
 
-        (bool upkeepNeeded, ) = stake.checkUpkeep("");
+        (bool upkeepNeeded,) = stake.checkUpkeep("");
         assert(!upkeepNeeded);
     }
 
@@ -134,12 +128,12 @@ contract StakeTesting is CodeConstantVariable, Test {
         vm.prank(PLAYER);
         stake.StakeEntry{value: entryfee}();
         vm.warp(block.timestamp + interval - 1);
-        (bool upkeepNeeded, ) = stake.checkUpkeep("");
+        (bool upkeepNeeded,) = stake.checkUpkeep("");
         assert(!upkeepNeeded);
     }
 
     function testcheckUpkeedIsfalseIfNoPlayerhasJoined() public {
-        (bool upkeedNeeded, ) = stake.checkUpkeep("");
+        (bool upkeedNeeded,) = stake.checkUpkeep("");
         assert(!upkeedNeeded);
     }
 
@@ -147,7 +141,7 @@ contract StakeTesting is CodeConstantVariable, Test {
         vm.prank(PLAYER);
         stake.StakeEntry{value: entryfee}();
         vm.warp(block.timestamp + interval + 1);
-        (bool upkeepNeeded, ) = stake.checkUpkeep("");
+        (bool upkeepNeeded,) = stake.checkUpkeep("");
         assert(upkeepNeeded);
     }
 
@@ -162,10 +156,7 @@ contract StakeTesting is CodeConstantVariable, Test {
         _;
     }
 
-    function testPerformUpkeeponlyRunIfCHeckupkeepReturnsTrue()
-        public
-        GetIntoStake
-    {
+    function testPerformUpkeeponlyRunIfCHeckupkeepReturnsTrue() public GetIntoStake {
         //arrange
         /* the modifier GetIntoStake will do part */
 
@@ -187,21 +178,13 @@ contract StakeTesting is CodeConstantVariable, Test {
         //act //assert
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                Stake.Stake__upkeepNotNeeded.selector,
-                currentBalance,
-                numOfPlayers,
-                sCondition
-            )
+            abi.encodeWithSelector(Stake.Stake__upkeepNotNeeded.selector, currentBalance, numOfPlayers, sCondition)
         );
         stake.performUpkeep("");
     }
 
     //In the next test we will what we will do if we need to get data from emitted events in our test?
-    function testPerformUpkeepUpdatesStakeConditionAndEmitsEVENTRequestID()
-        public
-        GetIntoStake
-    {
+    function testPerformUpkeepUpdatesStakeConditionAndEmitsEVENTRequestID() public GetIntoStake {
         //arrange
         /* the modifier GetIntoStake will do part */
 
@@ -226,24 +209,21 @@ contract StakeTesting is CodeConstantVariable, Test {
         _;
     }
 
-    /**@notice fuzz testing here, also see foundry.toml, we sent it to run with 1000 times which here will be 1000 diff requestids
+    /**
+     * @notice fuzz testing here, also see foundry.toml, we sent it to run with 1000 times which here will be 1000 diff requestids
      * After running this test set it to 256 default in .toml file as it take a bit longer to do this much test,1000s fine tho
      */
-
-    function testFullfillRandomWordsCanOnlyBeCalledAfterPerfromUpkeep(
-        uint256
-    ) public GetIntoStake ForkSkip {
-        /** @note for tgis test go to VRFC 2.5 Mock fullfill randomwords function to understand,we will try that function revert here */
+    function testFullfillRandomWordsCanOnlyBeCalledAfterPerfromUpkeep(uint256) public GetIntoStake ForkSkip {
+        /**
+         * @note for tgis test go to VRFC 2.5 Mock fullfill randomwords function to understand,we will try that function revert here
+         */
 
         //arrange
         /* the modifeir does this part */
 
         // act // assert
         vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
-        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(
-            0,
-            address(stake)
-        );
+        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(0, address(stake));
     }
 
     function testFullfillrandomWordsPicksAwinnerResetthearrayAndSendtheMoneytoTheWinner()
@@ -257,11 +237,7 @@ contract StakeTesting is CodeConstantVariable, Test {
         uint256 startingIndex = 1;
         address expectedWinner = address(1);
 
-        for (
-            uint256 i = startingIndex;
-            i < startingIndex + addtionalEntrants;
-            i++
-        ) {
+        for (uint256 i = startingIndex; i < startingIndex + addtionalEntrants; i++) {
             address newPlayer = address(uint160(i)); // how you convert uint to address
             hoax(newPlayer, PLAYER_BALANCE_STARTING);
             stake.StakeEntry{value: entryfee}();
@@ -280,10 +256,7 @@ contract StakeTesting is CodeConstantVariable, Test {
         Vm.Log[] memory entries = vm.getRecordedLogs();
         bytes32 requestId = entries[1].topics[1];
 
-        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(
-            uint256(requestId),
-            address(stake)
-        );
+        VRFCoordinatorV2_5Mock(vrfcoordinator).fulfillRandomWords(uint256(requestId), address(stake));
 
         //assert
         address recentWinner = stake.getMostrecentWinner();
