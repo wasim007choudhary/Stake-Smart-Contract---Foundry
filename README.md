@@ -43,35 +43,8 @@ This repository contains a fully functional **Stake Smart Contract** built using
 
 ---
 
-## 📦 Contract Deployment
 
-### 🛠 Environment Setup
-1. Create a `.env` file with the following variables:
-    ```env
-    SEPOLIA_RPC_URL=YOUR_RPC_URL
-    PRIVATE_KEY=YOUR_PRIVATE_KEY
-    CHAINLINK_VRF_COORDINATOR=YOUR_COORDINATOR_ADDRESS
-    CHAINLINK_SUBSCRIPTION_ID=YOUR_SUBSCRIPTION_ID
-    CHAINLINK_GAS_LANE=YOUR_GAS_LANE
-    CALLBACK_GAS_LIMIT=YOUR_CALLBACK_GAS_LIMIT
-    ENTRY_FEE=YOUR_ENTRY_FEE
-    INTERVAL=YOUR_INTERVAL
-    ```
-
-### 🚀 Deploy Contract
-1. Run the deployment script:
-    ```bash
-    forge script script/DeployStake.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast
-    ```
-
-2. Verify on Etherscan (if needed):
-    ```bash
-    forge verify-contract --chain sepolia --watch --etherscan-api-key YOUR_API_KEY CONTRACT_ADDRESS src/Stake.sol:Stake
-    ```
 
 ---
 
-## 🧪 Testing
-Run tests using Foundry:
-```bash
-forge test --fork-url $SEPOLIA_RPC_URL
+
