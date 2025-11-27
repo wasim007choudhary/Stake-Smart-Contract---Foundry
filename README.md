@@ -1,5 +1,8 @@
 # 🏆 Stake Smart Contract
 
+[![X (Twitter)](https://img.shields.io/badge/X-@i___wasim-black?logo=x)](https://x.com/i___wasim)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Wasim%20Choudhary-blue?logo=linkedin)](https://www.linkedin.com/in/wasim-007-choudhary/)
+
 ## 📘 Overview
 This repository contains a fully functional **Stake Smart Contract** built using Solidity. The contract utilizes **Chainlink VRF v2.5** for secure randomness and **Chainlink Automation** for automated execution.
 
